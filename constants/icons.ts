@@ -1,55 +1,45 @@
 import { ImageSourcePropType } from "react-native";
 
-import bookmark from "../assets/icons/bookmark.png";
-import home from "../assets/icons/home.png";
-import plus from "../assets/icons/plus.png";
-import profile from "../assets/icons/profile.png";
-import leftArrow from "../assets/icons/left-arrow.png";
-import menu from "../assets/icons/menu.png";
-import search from "../assets/icons/search.png";
-import upload from "../assets/icons/upload.png";
-import rightArrow from "../assets/icons/right-arrow.png";
-import logout from "../assets/icons/logout.png";
-import eyeHide from "../assets/icons/eye-hide.png";
-import eye from "../assets/icons/eye.png";
-import play from "../assets/icons/play.png";
-import lightMode from "../assets/icons/light-mode.png";
-import darkMode from "../assets/icons/dark-mode.png";
-import check from "../assets/icons/check.png"
-import mail from "../assets/icons/mail.png"
-import lock from "../assets/icons/lock.png"
-import arrowBack from "../assets/icons/arrow-back.png"
-import key from "../assets/icons/key.png"
-import person from "../assets/icons/person.png"
-import visibility from "../assets/icons/visibility.png"
-import visibilityOff from "../assets/icons/visibility-off.png"
-import error from "../assets/icons/error.png"
+import addImg from "../assets/icons/add.png"
+import addBoxImg from "../assets/icons/add-box.png"
+import arrowBackImg from "../assets/icons/arrow-back.png";
+import calendarImg from "../assets/icons/calendar.png"
+import checkImg from "../assets/icons/check.png";
+import clockImg from "../assets/icons/clock.png"
+import closeImg from "../assets/icons/close.png"
+import darkModeImg from "../assets/icons/dark-mode.png";
+import editImg from "../assets/icons/edit.png";
+import errorImg from "../assets/icons/error.png";
+import flagImg from "../assets/icons/flag.png";
+import gearImg from "../assets/icons/gear.png";
+import homeImg from "../assets/icons/home.png";
+import keyImg from "../assets/icons/key.png";
+import lightModeImg from "../assets/icons/light-mode.png";
+import lockImg from "../assets/icons/lock.png";
+import mailImg from "../assets/icons/mail.png";
+import personImg from "../assets/icons/person.png";
+import trashcanImg from "../assets/icons/trashcan.png"
+import visibilityImg from "../assets/icons/visibility.png";
+import visibilityOffImg from "../assets/icons/visibility-off.png";
 
-const icons: Record<string, ImageSourcePropType> = { 
-  play,
-  bookmark,
-  home,
-  plus,
-  profile,
-  leftArrow,
-  menu,
-  search,
-  upload,
-  rightArrow,
-  logout,
-  eyeHide,
-  eye,
-  lightMode,
-  darkMode,
-  check,
-  mail,
-  lock,
-  arrowBack,
-  key,
-  person,
-  visibility,
-  visibilityOff,
-  error
-};
-
-export default icons;
+export const add: ImageSourcePropType = addImg;
+export const addBox: ImageSourcePropType = addBoxImg;
+export const arrowBack: ImageSourcePropType = arrowBackImg;
+export const calendar: ImageSourcePropType = calendarImg;
+export const check: ImageSourcePropType = checkImg;
+export const clock: ImageSourcePropType = clockImg;
+export const close: ImageSourcePropType = closeImg;
+export const darkMode: ImageSourcePropType = darkModeImg;
+export const edit: ImageSourcePropType = editImg;
+export const error: ImageSourcePropType = errorImg;
+export const flag: ImageSourcePropType = flagImg;
+export const gear: ImageSourcePropType = gearImg;
+export const home: ImageSourcePropType = homeImg;
+export const key: ImageSourcePropType = keyImg;
+export const lightMode: ImageSourcePropType = lightModeImg;
+export const lock: ImageSourcePropType = lockImg;
+export const mail: ImageSourcePropType = mailImg;
+export const person: ImageSourcePropType = personImg;
+export const trashcan: ImageSourcePropType = trashcanImg;
+export const visibility: ImageSourcePropType = visibilityImg;
+export const visibilityOff: ImageSourcePropType = visibilityOffImg;

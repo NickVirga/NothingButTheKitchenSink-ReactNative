@@ -18,7 +18,7 @@ const Profile = () => {
                 }}
                 title={"Log out"}
                 handlePress={() => {
-                  authContext?.logout();
+                  authContext?.logout(true);
                   router.replace("/");
                 }}
               />

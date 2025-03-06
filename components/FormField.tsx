@@ -5,8 +5,11 @@ import {
   StyleSheet,
   KeyboardTypeOptions,
 } from "react-native";
-import { ThemedView, ThemedText, StaticIcon, DynamicIcon } from "../components";
-import { icons } from "../constants";
+import ThemedView from "../components/ThemedView";
+import ThemedText from "../components/ThemedText";
+import StaticIcon from "../components/StaticIcon";
+import DynamicIcon from "./DynamicIcon";
+import { visibility, visibilityOff, check, error } from "../constants/icons";
 import { useTheme } from "../context/ThemeContext";
 import { ImageSourcePropType } from "react-native";
 
@@ -51,10 +54,10 @@ const FormField: React.FC<FormFieldProps> = ({
         style={[
           styles.fieldContainer,
           isValidated
-            ? { borderColor: theme.tint }
+            ? { borderColor: theme.textNotable }
             : hasError
             ? { borderColor: theme.error }
-            : { borderColor: theme.decorative },
+            : { borderColor: theme.borderSubtle },
         ]}
       >
         {labelIcon && (
@@ -63,10 +66,10 @@ const FormField: React.FC<FormFieldProps> = ({
             icon={labelIcon}
             color={
               isValidated
-                ? theme.tint
+                ? theme.textNotable
                 : hasError
                 ? theme.error
-                : theme.formSubtle
+                : theme.iconSubtle
             }
             isTouchable={false}
           />
@@ -74,7 +77,7 @@ const FormField: React.FC<FormFieldProps> = ({
         <TextInput
           value={value}
           placeholder={placeholder}
-          placeholderTextColor={theme.formSubtle}
+          placeholderTextColor={theme.textSubtle}
           onChangeText={handleChangeText}
           secureTextEntry={secureTextEntry && !showPassword}
           textContentType={textContentType}
@@ -86,7 +89,7 @@ const FormField: React.FC<FormFieldProps> = ({
           style={[
             styles.textInput,
             isValidated
-              ? { color: theme.tint }
+              ? { color: theme.textNotable }
               : hasError
               ? { color: theme.error }
               : { color: theme.text },
@@ -96,22 +99,22 @@ const FormField: React.FC<FormFieldProps> = ({
           <DynamicIcon
             size={iconSize}
             stateZeroIcon={{}}
-            stateOneIcon={icons.check}
+            stateOneIcon={check}
             stateOneEnabled={isValidated}
             stateZeroStyle={{ tintColor: theme.border }}
-            stateOneStyle={{ tintColor: theme.tint }}
+            stateOneStyle={{ tintColor: theme.textNotable }}
           />
         )}
         {secureTextEntry && (
           <DynamicIcon
             size={iconSize}
-            stateZeroIcon={icons.visibilityOff}
-            stateOneIcon={icons.visibility}
+            stateZeroIcon={visibilityOff}
+            stateOneIcon={visibility}
             stateOneEnabled={showPassword}
             handlePressIcon={() => setShowPassword((prev) => !prev)}
             isTouchable
-            stateZeroStyle={{ tintColor: theme.formSubtle }}
-            stateOneStyle={{ tintColor: theme.formSubtle }}
+            stateZeroStyle={{ tintColor: theme.iconSubtle }}
+            stateOneStyle={{ tintColor: theme.iconSubtle }}
           />
         )}
       </ThemedView>
@@ -132,7 +135,7 @@ const FormField: React.FC<FormFieldProps> = ({
           >
             <StaticIcon
               size={iconSize}
-              icon={icons.error}
+              icon={error}
               color={theme.error}
               isTouchable={false}
             />

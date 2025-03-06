@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import {
   ThemedButton,
   ThemedText,
@@ -7,24 +7,23 @@ import {
   FormField,
   StaticIcon,
 } from "../../components";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import {
   ScrollView,
-  View,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useTheme } from "../../context/ThemeContext";
-import { icons } from "../../constants";
+import { arrowBack, mail, lock, key, error } from "../../constants/icons";
 import {
   FormError,
   ResetPasswordForm,
   AuthRequestResponse,
   AuthRequestError,
 } from "../../types/forms";
+import { apiClient } from "../../context/AuthContext";
 
 export default function AuthReset() {
   const { theme } = useTheme();
@@ -44,8 +43,6 @@ export default function AuthReset() {
       errorMessage: "",
     },
   };
-
-  const API_BASE_URL: string | undefined = process.env.EXPO_PUBLIC_API_URL;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -129,11 +126,7 @@ export default function AuthReset() {
         secret_key: formData.secretKey.value,
       };
 
-      await axios.post<AuthRequestResponse>(
-        `${API_BASE_URL}/api/auth/reset`,
-        requestBody,
-        { headers: { "Content-Type": "application/json" }, timeout: 5000 }
-      );
+      await apiClient.post<AuthRequestResponse>("/api/auth/reset", requestBody);
 
       router.replace({
         pathname: "/login",
@@ -160,130 +153,135 @@ export default function AuthReset() {
   };
 
   return (
-    <SafeAreaView>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <ScrollView
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={{
-            height: "100%",
-          }}
+    <SafeAreaProvider>
+      <SafeAreaView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <ThemedView
-            style={{
-              padding: 32,
-              flexDirection: "column",
-              justifyContent: "space-between",
+          <ScrollView
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={{
+              height: "100%",
             }}
           >
-            <ThemedView>
-              <StaticIcon
-                size={32}
-                icon={icons.arrowBack}
-                color={theme.formSubtle}
-                isTouchable={true}
-                handlePressIcon={() => {
-                  Keyboard.dismiss();
-                  router.push("/login");
-                }}
-              />
-              <ThemedText
-                type={"title"}
-                style={{
-                  marginTop: 100,
-                }}
-              >
-                Reset{"\n"}Password
-              </ThemedText>
-            </ThemedView>
             <ThemedView
               style={{
-                flex: 0,
+                padding: 32,
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              <ThemedView style={{ flexDirection: "column", gap: 0, flex: 0 }}>
-                <FormField
-                  placeholder="Email"
-                  value={formData.email.value}
-                  handleChangeText={(text) => handleInputChange("email", text)}
-                  labelIcon={icons.mail}
-                  fieldValidation={true}
-                  autoComplete={"email"}
-                  textContentType={"emailAddress"}
-                  keyboardType={"email-address"}
+              <ThemedView>
+                <StaticIcon
+                  size={32}
+                  icon={arrowBack}
+                  color={theme.icon}
+                  isTouchable={true}
+                  handlePressIcon={() => {
+                    Keyboard.dismiss();
+                    router.push("/login");
+                  }}
                 />
-                <FormField
-                  placeholder="New Password"
-                  value={formData.newPassword.value}
-                  handleChangeText={(text) =>
-                    handleInputChange("newPassword", text)
-                  }
-                  labelIcon={icons.lock}
-                  secureTextEntry={true}
-                  autoComplete={"new-password"}
-                  textContentType={"password"}
-                  hasError={formData.newPassword.hasError}
-                  errorMessage={formData.newPassword.errorMessage}
-                />
-                <FormField
-                  placeholder="Secret Key"
-                  value={formData.secretKey.value}
-                  handleChangeText={(text) =>
-                    handleInputChange("secretKey", text)
-                  }
-                  labelIcon={icons.key}
-                  secureTextEntry={true}
-                  textContentType={"none"}
-                  hasError={formData.secretKey.hasError}
-                  errorMessage={formData.secretKey.errorMessage}
-                />
+                <ThemedText
+                  type={"title"}
+                  style={{
+                    marginTop: 100,
+                  }}
+                >
+                  Reset{"\n"}Password
+                </ThemedText>
               </ThemedView>
               <ThemedView
                 style={{
                   flex: 0,
                 }}
               >
-                {formError.hasError && (
-                  <ThemedView
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      flex: 0,
-                      gap: 6,
-                      position: "absolute",
-                      top: 5,
-                    }}
-                  >
-                    <StaticIcon
-                      size={20}
-                      icon={icons.error}
-                      color={theme.error}
-                      isTouchable={false}
-                    />
-                    <ThemedText style={{ color: theme.error }}>
-                      {formError.message}
-                    </ThemedText>
-                  </ThemedView>
-                )}
-              </ThemedView>
-              <ThemedView style={{ flex: 0, marginTop: 48 }}>
-                <ThemedButton
-                  title="Reset Password"
-                  handlePress={() => handleReset()}
-                  isLoading={isLoading}
-                  customContainerStyles={{
-                    backgroundColor: theme.tint,
-                    borderColor: "transparent",
+                <ThemedView
+                  style={{ flexDirection: "column", gap: 0, flex: 0 }}
+                >
+                  <FormField
+                    placeholder="Email"
+                    value={formData.email.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("email", text)
+                    }
+                    labelIcon={mail}
+                    fieldValidation={true}
+                    autoComplete={"email"}
+                    textContentType={"emailAddress"}
+                    keyboardType={"email-address"}
+                  />
+                  <FormField
+                    placeholder="New Password"
+                    value={formData.newPassword.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("newPassword", text)
+                    }
+                    labelIcon={lock}
+                    secureTextEntry={true}
+                    autoComplete={"new-password"}
+                    textContentType={"password"}
+                    hasError={formData.newPassword.hasError}
+                    errorMessage={formData.newPassword.errorMessage}
+                  />
+                  <FormField
+                    placeholder="Secret Key"
+                    value={formData.secretKey.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("secretKey", text)
+                    }
+                    labelIcon={key}
+                    secureTextEntry={true}
+                    textContentType={"none"}
+                    hasError={formData.secretKey.hasError}
+                    errorMessage={formData.secretKey.errorMessage}
+                  />
+                </ThemedView>
+                <ThemedView
+                  style={{
+                    flex: 0,
                   }}
-                  customTextStyles={{ color: theme.background }}
-                />
+                >
+                  {formError.hasError && (
+                    <ThemedView
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 0,
+                        gap: 6,
+                        position: "absolute",
+                        top: 5,
+                      }}
+                    >
+                      <StaticIcon
+                        size={20}
+                        icon={error}
+                        color={theme.error}
+                        isTouchable={false}
+                      />
+                      <ThemedText style={{ color: theme.error }}>
+                        {formError.message}
+                      </ThemedText>
+                    </ThemedView>
+                  )}
+                </ThemedView>
+                <ThemedView style={{ flex: 0, marginTop: 48 }}>
+                  <ThemedButton
+                    title="Reset Password"
+                    handlePress={() => handleReset()}
+                    isLoading={isLoading}
+                    customContainerStyles={{
+                      backgroundColor: theme.backgroundNotable,
+                      borderColor: theme.backgroundNotable,
+                    }}
+                    customTextStyles={{ color: theme.background }}
+                  />
+                </ThemedView>
               </ThemedView>
             </ThemedView>
-          </ThemedView>
-        </ScrollView>
-      </KeyboardAvoidingView>
-      <StatusBar backgroundColor={theme.statusBar} style="dark" />
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }

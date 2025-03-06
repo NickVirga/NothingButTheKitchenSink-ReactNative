@@ -1,13 +1,13 @@
-import { Redirect, Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-
-// import { Loader } from "../../components";
-// import { useGlobalContext } from "../../context/GlobalProvider";
+import { Stack } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
+import {
+  useSafeAreaInsets,
+  EdgeInsets,
+} from "react-native-safe-area-context";
 
 const AuthLayout = () => {
-  // const { loading, isLogged } = useGlobalContext();
-
-  // if (!loading && isLogged) return <Redirect href="/home" />;
+  const { customNavBarAndStatusBar } = useTheme();
+  const insets: EdgeInsets = useSafeAreaInsets();
 
   return (
     <>
@@ -24,16 +24,14 @@ const AuthLayout = () => {
             headerShown: false,
           }}
         />
-      <Stack.Screen
+        <Stack.Screen
           name="reset"
           options={{
             headerShown: false,
           }}
         />
       </Stack>
-
-      {/* <Loader isLoading={loading} /> */}
-      <StatusBar backgroundColor="#161622" style="light" />
+      {customNavBarAndStatusBar(insets.top, insets.bottom)}
     </>
   );
 };

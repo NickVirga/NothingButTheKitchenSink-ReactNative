@@ -1,36 +1,38 @@
-import { Image, ImageSourcePropType, ImageStyle, TouchableOpacity } from "react-native";
+import { Image, ImageSourcePropType, ImageStyle, TouchableOpacity, StyleProp, ViewStyle} from "react-native";
 import React from "react";
 
 type StaticIconProps = {
   size: number;
-  icon?: ImageSourcePropType;
+  icon: ImageSourcePropType;
   color: string;
-  style?: ImageStyle;
+  containerStyle?: StyleProp<ViewStyle>;
+  imageStyle?: ImageStyle;
   handlePressIcon?: () => void;
-  isTouchable: boolean;
+  isTouchable?: boolean;
 };
 
 const StaticIcon: React.FC<StaticIconProps> = ({
   size,
   icon,
   color,
-  style,
+  containerStyle,
+  imageStyle,
   handlePressIcon,
-  isTouchable,
+  isTouchable = false,
 }) => {
   return isTouchable ? (
-    <TouchableOpacity onPress={handlePressIcon}>
+    <TouchableOpacity onPress={handlePressIcon} style={containerStyle} disabled={!isTouchable}>
       <Image
         source={icon}
         resizeMode="contain"
-        style={[{ width: size, height: size, tintColor: color, aspectRatio: 1 }, style]}
+        style={[{ width: size, height: size, tintColor: color, aspectRatio: 1 }, imageStyle]}
       />
     </TouchableOpacity>
   ) : (
     <Image
       source={icon}
       resizeMode="contain"
-      style={[{ width: size, height: size, tintColor: color }, style]}
+      style={[{ width: size, height: size, tintColor: color, aspectRatio: 1 }, imageStyle]}
     />
   );
 };

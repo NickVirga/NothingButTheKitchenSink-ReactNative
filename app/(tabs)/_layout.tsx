@@ -1,9 +1,12 @@
-import { View, Text, Image, ImageSourcePropType, StyleSheet, Dimensions  } from "react-native";
-import { RFValue } from "react-native-responsive-fontsize";
+import { View, Text, Image, ImageSourcePropType, StyleSheet } from "react-native";
 import React from "react";
-import { Tabs, Redirect } from "expo-router";
-
-import { icons } from '../../constants'
+import { Tabs } from "expo-router";
+import { useTheme } from "../../context/ThemeContext";
+import {
+  useSafeAreaInsets,
+  EdgeInsets,
+} from "react-native-safe-area-context";
+import { home, person, edit, gear } from '../../constants/icons'
 
 interface TabIconProps {
   icon: ImageSourcePropType;
@@ -27,17 +30,18 @@ const TabIcon: React.FC<TabIconProps> = ({ icon, color, name, focused}) => {
 }
 
 const TabsLayout = () => {
+  const { customNavBarAndStatusBar, theme } = useTheme();
+  const insets: EdgeInsets = useSafeAreaInsets();
+
   return (
     <View style={{flex: 1}}>
       <Tabs screenOptions={{
-          tabBarActiveTintColor: "#FFA001",
-          tabBarInactiveTintColor: "#CDCDE0",
+          tabBarActiveTintColor: theme.tabIconActive,
+          tabBarInactiveTintColor: theme.tabIconDefault,
           tabBarShowLabel: false,
           tabBarStyle: {
-            backgroundColor: "#161622",
-            borderTopWidth: 1,
-            borderTopColor: "#232533",
-            height: 84,
+            backgroundColor: theme.background,
+            borderTopWidth: 0,
           },}}>
         <Tabs.Screen
           name="home"
@@ -46,7 +50,7 @@ const TabsLayout = () => {
             headerShown: false,
             tabBarIcon: ({color, focused}) => (
               <TabIcon
-                icon={icons.home}
+                icon={home}
                 color={color}
                 name="Home"
                 focused={focused}
@@ -57,27 +61,13 @@ const TabsLayout = () => {
         <Tabs.Screen
           name="tab2"
           options={{ 
-            title: "Bookmark",
+            title: "Edit",
             headerShown: false,
             tabBarIcon: ({color, focused}) => (
               <TabIcon
-                icon={icons.bookmark}
+                icon={edit}
                 color={color}
-                name="Bookmark"
-                focused={focused}
-                />
-            ) }} 
-        />
-        <Tabs.Screen
-          name="tab3"
-          options={{ 
-            title: "Create",
-            headerShown: false,
-            tabBarIcon: ({color, focused}) => (
-              <TabIcon
-                icon={icons.plus}
-                color={color}
-                name="Create"
+                name="Edit"
                 focused={focused}
                 />
             ) }} 
@@ -89,14 +79,29 @@ const TabsLayout = () => {
             headerShown: false,
             tabBarIcon: ({color, focused}) => (
               <TabIcon
-                icon={icons.profile}
+                icon={person}
                 color={color}
                 name="Profile"
                 focused={focused}
                 />
             ) }} 
         />
+        <Tabs.Screen
+          name="settings"
+          options={{ 
+            title: "Settings",
+            headerShown: false,
+            tabBarIcon: ({color, focused}) => (
+              <TabIcon
+                icon={gear}
+                color={color}
+                name="Settings"
+                focused={focused}
+                />
+            ) }} 
+        />
       </Tabs>
+      {customNavBarAndStatusBar(insets.top, 0)}
     </View>
   );
 };
@@ -105,18 +110,17 @@ export default TabsLayout;
 
 const styles = StyleSheet.create({
   icon: {
-    height: 24,
-    width: 24,
+    height: 32,
+    width: 32,
   },
   tabText: {
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: 400,
   },
   tabView: {
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 20, //naive way to move position of icon lower (couldn't get flex to work) 
+    marginTop: 10, //naive way to move position of icon lower (couldn't get flex to work) 
     width: 100, //naive way to give text/icon enough horiz width (couldn't get flex to work)
   }
 })

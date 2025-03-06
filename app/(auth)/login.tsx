@@ -6,35 +6,31 @@ import {
   FormField,
   StaticIcon,
 } from "../../components";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   ScrollView,
   View,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+
 import { useTheme } from "../../context/ThemeContext";
-import { icons } from "../../constants";
-import {
-  FormError,
-  LoginForm,
-} from "../../types/forms";
-import axios, { AxiosError, AxiosResponse } from "axios";
-import { useAuthContext } from "../../context/AuthContext";
+import { arrowBack, mail, lock, error } from "../../constants/icons";
+import { FormError, LoginForm } from "../../types/forms";
+import { AxiosError, AxiosResponse } from "axios";
+import { useAuthContext, apiClient } from "../../context/AuthContext";
 import {
   AuthLoginRequest,
   AuthLoginResponse,
-  AuthRequestError
+  AuthRequestError,
 } from "../../types/auth";
 
-
-export default function AuthLogin() {
+const AuthLogin: React.FC = () => {
   const { theme } = useTheme();
-  const authContext = useAuthContext()
+  const authContext = useAuthContext();
   const params = useLocalSearchParams();
   const titleText: string = String(params.message || "Welcome\nBack");
 
@@ -46,8 +42,6 @@ export default function AuthLogin() {
       errorMessage: "",
     },
   };
-
-  const API_BASE_URL: string | undefined = process.env.EXPO_PUBLIC_API_URL;
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -85,14 +79,13 @@ export default function AuthLogin() {
         password: formData.password.value,
       };
 
-      const response: AxiosResponse<AuthLoginResponse> = await axios.post(
-        `${API_BASE_URL}/api/auth/login`,
-        requestBody,
-        { headers: { "Content-Type": "application/json" }, timeout: 5000 }
+      const response: AxiosResponse<AuthLoginResponse> = await apiClient.post(
+        "/api/auth/login",
+        requestBody
       );
 
-      authContext?.saveTokens(response.data.authTokens)
-      router.replace('/home');
+      authContext?.saveTokens(response.data.authTokens);
+      router.replace("/home");
     } catch (err) {
       const error = err as AxiosError<AuthRequestError>;
       if (error.response) {
@@ -114,191 +107,198 @@ export default function AuthLogin() {
   };
 
   return (
-    <SafeAreaView>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <ScrollView
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={{
-            height: "100%",
-          }}
+    <SafeAreaProvider>
+      <SafeAreaView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <ThemedView
-            style={{
-              padding: 32,
-              flexDirection: "column",
-              justifyContent: "space-between",
+          <ScrollView
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={{
+              height: "100%",
             }}
           >
-            <ThemedView>
-              <StaticIcon
-                size={32}
-                icon={icons.arrowBack}
-                color={theme.formSubtle}
-                isTouchable={true}
-                handlePressIcon={() => {
-                  Keyboard.dismiss();
-                  router.push("/");
-                }}
-              />
-              <ThemedText
-                type={"title"}
-                style={{
-                  marginTop: 100,
-                }}
-              >
-                {titleText}
-              </ThemedText>
-            </ThemedView>
             <ThemedView
               style={{
-                flex: 0,
+                padding: 32,
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              <ThemedView style={{ flexDirection: "column", gap: 0, flex: 0 }}>
-                <FormField
-                  placeholder="Email"
-                  value={formData.email.value}
-                  handleChangeText={(text) => handleInputChange("email", text)}
-                  labelIcon={icons.mail}
-                  fieldValidation={true}
-                  autoComplete={"email"}
-                  textContentType={"emailAddress"}
-                  keyboardType={"email-address"}
+              <ThemedView>
+                <StaticIcon
+                  size={32}
+                  icon={arrowBack}
+                  color={theme.iconSubtle}
+                  isTouchable={true}
+                  handlePressIcon={() => {
+                    Keyboard.dismiss();
+                    router.push("/");
+                  }}
                 />
-                <FormField
-                  placeholder="Password"
-                  value={formData.password.value}
-                  handleChangeText={(text) =>
-                    handleInputChange("password", text)
-                  }
-                  labelIcon={icons.lock}
-                  secureTextEntry={true}
-                  autoComplete={"current-password"}
-                  textContentType={"password"}
-                />
-                <TouchableOpacity
-                style={{
-                  flex: 0,
-                  justifyContent: "flex-end",
-                  flexDirection: "row",
-                  position: 'absolute',
-                  bottom: 0,
-                  alignSelf: 'flex-end'
-                }}
-                onPress={()=>{
-                  Keyboard.dismiss()
-                  router.replace({
-                  pathname: "/reset",
-                  params: { email: formData.email.value },
-                });}}
-                
-                activeOpacity={0.7}
-              >
                 <ThemedText
+                  type={"title"}
                   style={{
-                    color: theme.buttonNotable,
-                    fontWeight: 500,
-                  }} 
+                    marginTop: 100,
+                  }}
                 >
-                  Forgot password?
+                  {titleText}
                 </ThemedText>
-              </TouchableOpacity>
               </ThemedView>
-              
               <ThemedView
                 style={{
                   flex: 0,
                 }}
               >
-                {formError.hasError && (
-                  <ThemedView
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      flex: 0,
-                      gap: 6,
-                      position: "absolute",
-                      top: 5,
-                    }}
-                  >
-                    <StaticIcon
-                      size={20}
-                      icon={icons.error}
-                      color={theme.error}
-                      isTouchable={false}
-                    />
-                    <ThemedText style={{ color: theme.error }}>
-                      {formError.message}
-                    </ThemedText>
-                  </ThemedView>
-                )}
-              </ThemedView>
-              <ThemedView style={{ flex: 0, marginTop: 48 }}>
-                <ThemedButton
-                  title="Log in"
-                  handlePress={() => handleLogin()}
-                  isLoading={isLoading}
-                  customContainerStyles={{
-                    backgroundColor: theme.tint,
-                    borderColor: "transparent",
-                  }}
-                  customTextStyles={{ color: theme.background }}
-                />
                 <ThemedView
-                  style={{
-                    marginVertical: 16,
-                    flex: 0,
-                    gap: 12,
-                    flexDirection: "row",
-                  }}
+                  style={{ flexDirection: "column", gap: 0, flex: 0 }}
                 >
-                  <View
-                    style={{
-                      borderBottomColor: theme.decorative,
-                      borderBottomWidth: 1,
-                      borderStyle: "solid",
-                      height: "50%",
-                      flex: 1,
-                    }}
+                  <FormField
+                    placeholder="Email"
+                    value={formData.email.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("email", text)
+                    }
+                    labelIcon={mail}
+                    fieldValidation={true}
+                    autoComplete={"email"}
+                    textContentType={"emailAddress"}
+                    keyboardType={"email-address"}
                   />
-                  <ThemedText
+                  <FormField
+                    placeholder="Password"
+                    value={formData.password.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("password", text)
+                    }
+                    labelIcon={lock}
+                    secureTextEntry={true}
+                    autoComplete={"current-password"}
+                    textContentType={"password"}
+                  />
+                  <TouchableOpacity
                     style={{
-                      color: theme.formSubtle,
-                      textAlign: "center",
-                      lineHeight: 16,
-                      fontSize: 17,
+                      flex: 0,
+                      justifyContent: "flex-end",
+                      flexDirection: "row",
+                      position: "absolute",
+                      bottom: 0,
+                      alignSelf: "flex-end",
                     }}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      router.replace({
+                        pathname: "/reset",
+                        params: { email: formData.email.value },
+                      });
+                    }}
+                    activeOpacity={0.7}
                   >
-                    or
-                  </ThemedText>
-                  <View
-                    style={{
-                      borderBottomColor: theme.decorative,
-                      borderBottomWidth: 1,
-                      borderStyle: "solid",
-                      height: "50%",
-                      flex: 1,
-                    }}
-                  />
+                    <ThemedText
+                      style={{
+                        color: theme.textNotable,
+                        fontWeight: 500,
+                      }}
+                    >
+                      Forgot password?
+                    </ThemedText>
+                  </TouchableOpacity>
                 </ThemedView>
 
-                <ThemedButton
-                  title="Sign up"
-                  handlePress={() => {
-                    Keyboard.dismiss();
-                    router.push("/register");
+                <ThemedView
+                  style={{
+                    flex: 0,
                   }}
-                  customContainerStyles={{ borderColor: theme.buttonSubtle }}
-                  customTextStyles={{ color: theme.buttonSubtle }}
-                />
+                >
+                  {formError.hasError && (
+                    <ThemedView
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 0,
+                        gap: 6,
+                        position: "absolute",
+                        top: 5,
+                      }}
+                    >
+                      <StaticIcon
+                        size={20}
+                        icon={error}
+                        color={theme.error}
+                        isTouchable={false}
+                      />
+                      <ThemedText style={{ color: theme.error }}>
+                        {formError.message}
+                      </ThemedText>
+                    </ThemedView>
+                  )}
+                </ThemedView>
+                <ThemedView style={{ flex: 0, marginTop: 48 }}>
+                  <ThemedButton
+                    title="Log in"
+                    handlePress={() => handleLogin()}
+                    isLoading={isLoading}
+                    customContainerStyles={{
+                      backgroundColor: theme.backgroundNotable,
+                      borderColor: "transparent",
+                    }}
+                    customTextStyles={{ color: theme.background }}
+                  />
+                  <ThemedView
+                    style={{
+                      marginVertical: 16,
+                      flex: 0,
+                      gap: 12,
+                      flexDirection: "row",
+                    }}
+                  >
+                    <View
+                      style={{
+                        borderBottomColor: theme.borderSubtle,
+                        borderBottomWidth: 1,
+                        borderStyle: "solid",
+                        height: "50%",
+                        flex: 1,
+                      }}
+                    />
+                    <ThemedText
+                      style={{
+                        color: theme.textSubtle,
+                        textAlign: "center",
+                        lineHeight: 16,
+                        fontSize: 17,
+                      }}
+                    >
+                      or
+                    </ThemedText>
+                    <View
+                      style={{
+                        borderBottomColor: theme.borderSubtle,
+                        borderBottomWidth: 1,
+                        borderStyle: "solid",
+                        height: "50%",
+                        flex: 1,
+                      }}
+                    />
+                  </ThemedView>
+
+                  <ThemedButton
+                    title="Sign up"
+                    handlePress={() => {
+                      Keyboard.dismiss();
+                      router.push("/register");
+                    }}
+                    customContainerStyles={{ borderColor: theme.borderSubtle }}
+                    customTextStyles={{ color: theme.textSubtle }}
+                  />
+                </ThemedView>
               </ThemedView>
             </ThemedView>
-          </ThemedView>
-        </ScrollView>
-      </KeyboardAvoidingView>
-      <StatusBar backgroundColor={theme.statusBar} style="dark" />
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
-}
+};
+
+export default AuthLogin;

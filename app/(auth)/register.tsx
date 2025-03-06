@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import {
   ThemedButton,
   ThemedText,
@@ -7,7 +7,7 @@ import {
   FormField,
   StaticIcon,
 } from "../../components";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import {
   ScrollView,
   View,
@@ -16,13 +16,22 @@ import {
   Keyboard,
 } from "react-native";
 import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useTheme } from "../../context/ThemeContext";
-import { icons } from "../../constants";
-
-import { FormError, RegisterForm, AuthRequestResponse, AuthRequestError } from "../../types/forms"
-
-const API_BASE_URL:string | undefined = process.env.EXPO_PUBLIC_API_URL;
+import {
+  arrowBack,
+  mail,
+  person,
+  lock,
+  key,
+  error,
+} from "../../constants/icons";
+import {
+  FormError,
+  RegisterForm,
+  AuthRequestResponse,
+  AuthRequestError,
+} from "../../types/forms";
+import { apiClient } from "../../context/AuthContext";
 
 export default function AuthRegister() {
   const { theme } = useTheme();
@@ -170,13 +179,11 @@ export default function AuthRegister() {
         secret_key: formData.secretKey.value,
       };
 
-      const response = await axios.post<AuthRequestResponse>(
-        `${API_BASE_URL}/api/auth/register`,
-        requestBody,
-        { headers: { "Content-Type": "application/json" }, timeout: 5000 }
+      const response = await apiClient.post<AuthRequestResponse>(
+        "/api/auth/register",
+        requestBody
       );
 
-      // console.log("Success:", response.data);
       router.replace({
         pathname: "/login",
         params: { message: "Registration successful.\nPlease log in" },
@@ -202,191 +209,196 @@ export default function AuthRegister() {
   };
 
   return (
-    <SafeAreaView>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <ScrollView
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={{
-            height: "100%",
-          }}
+    <SafeAreaProvider>
+      <SafeAreaView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <ThemedView
-            style={{
-              padding: 32,
-              flexDirection: "column",
-              justifyContent: "space-between",
+          <ScrollView
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={{
+              height: "100%",
             }}
           >
-            <ThemedView>
-              <StaticIcon
-                size={32}
-                icon={icons.arrowBack}
-                color={theme.formSubtle}
-                isTouchable={true}
-                handlePressIcon={() => {
-                  Keyboard.dismiss();
-                  router.push("/");
-                }}
-              />
-              <ThemedText
-                type={"title"}
-                style={{
-                  marginTop: 100,
-                }}
-              >
-                Create{"\n"}Account
-              </ThemedText>
-            </ThemedView>
             <ThemedView
               style={{
-                flex: 0,
+                padding: 32,
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              <ThemedView style={{ flexDirection: "column", gap: 0, flex: 0 }}>
-                <FormField
-                  placeholder="Name"
-                  value={formData.name.value}
-                  handleChangeText={(text) => handleInputChange("name", text)}
-                  labelIcon={icons.person}
-                  fieldValidation={true}
-                  autoComplete={"name"}
-                  textContentType={"name"}
-                  hasError={formData.name.hasError}
-                  errorMessage={formData.name.errorMessage}
+              <ThemedView>
+                <StaticIcon
+                  size={32}
+                  icon={arrowBack}
+                  color={theme.icon}
+                  isTouchable={true}
+                  handlePressIcon={() => {
+                    Keyboard.dismiss();
+                    router.push("/");
+                  }}
                 />
-                <FormField
-                  placeholder="Email"
-                  value={formData.email.value}
-                  handleChangeText={(text) => handleInputChange("email", text)}
-                  labelIcon={icons.mail}
-                  fieldValidation={true}
-                  autoComplete={"email"}
-                  textContentType={"emailAddress"}
-                  keyboardType={"email-address"}
-                  hasError={formData.email.hasError}
-                  errorMessage={formData.email.errorMessage}
-                />
-                <FormField
-                  placeholder="Password"
-                  value={formData.password.value}
-                  handleChangeText={(text) =>
-                    handleInputChange("password", text)
-                  }
-                  labelIcon={icons.lock}
-                  secureTextEntry={true}
-                  // autoComplete={"new-password"}
-                  // textContentType={"password"}
-                  hasError={formData.password.hasError}
-                  errorMessage={formData.password.errorMessage}
-                />
-                <FormField
-                  placeholder="Secret Key"
-                  value={formData.secretKey.value}
-                  handleChangeText={(text) =>
-                    handleInputChange("secretKey", text)
-                  }
-                  labelIcon={icons.key}
-                  secureTextEntry={true}
-                  // autoComplete={"new-password"}
-                  textContentType={"none"}
-                  hasError={formData.secretKey.hasError}
-                  errorMessage={formData.secretKey.errorMessage}
-                />
+                <ThemedText
+                  type={"title"}
+                  style={{
+                    marginTop: 100,
+                  }}
+                >
+                  Create{"\n"}Account
+                </ThemedText>
               </ThemedView>
               <ThemedView
                 style={{
                   flex: 0,
-                  position: "relative",
                 }}
               >
-                {formError.hasError && (
-                  <ThemedView
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      flex: 0,
-                      gap: 6,
-                      position: "absolute",
-                      top: 5,
-                    }}
-                  >
-                    <StaticIcon
-                      size={20}
-                      icon={icons.error}
-                      color={theme.error}
-                      isTouchable={false}
-                    />
-                    <ThemedText style={{ color: theme.error }}>
-                      {formError.message}
-                    </ThemedText>
-                  </ThemedView>
-                )}
-              </ThemedView>
-              <ThemedView style={{ flex: 0, marginTop: 48 }}>
-                <ThemedButton
-                  title="Sign up"
-                  handlePress={() => handleRegister()}
-                  isLoading={isLoading}
-                  customContainerStyles={{
-                    backgroundColor: theme.tint,
-                    borderColor: "transparent",
-                  }}
-                  customTextStyles={{ color: theme.background }}
-                />
                 <ThemedView
-                  style={{
-                    marginVertical: 16,
-                    flex: 0,
-                    gap: 12,
-                    flexDirection: "row",
-                  }}
+                  style={{ flexDirection: "column", gap: 0, flex: 0 }}
                 >
-                  <View
-                    style={{
-                      borderBottomColor: theme.decorative,
-                      borderBottomWidth: 1,
-                      borderStyle: "solid",
-                      height: "50%",
-                      flex: 1,
-                    }}
+                  <FormField
+                    placeholder="Name"
+                    value={formData.name.value}
+                    handleChangeText={(text) => handleInputChange("name", text)}
+                    labelIcon={person}
+                    fieldValidation={true}
+                    autoComplete={"name"}
+                    textContentType={"name"}
+                    hasError={formData.name.hasError}
+                    errorMessage={formData.name.errorMessage}
                   />
-                  <ThemedText
-                    style={{
-                      color: theme.formSubtle,
-                      textAlign: "center",
-                      lineHeight: 16,
-                      fontSize: 17,
-                    }}
-                  >
-                    or
-                  </ThemedText>
-                  <View
-                    style={{
-                      borderBottomColor: theme.decorative,
-                      borderBottomWidth: 1,
-                      borderStyle: "solid",
-                      height: "50%",
-                      flex: 1,
-                    }}
+                  <FormField
+                    placeholder="Email"
+                    value={formData.email.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("email", text)
+                    }
+                    labelIcon={mail}
+                    fieldValidation={true}
+                    autoComplete={"email"}
+                    textContentType={"emailAddress"}
+                    keyboardType={"email-address"}
+                    hasError={formData.email.hasError}
+                    errorMessage={formData.email.errorMessage}
+                  />
+                  <FormField
+                    placeholder="Password"
+                    value={formData.password.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("password", text)
+                    }
+                    labelIcon={lock}
+                    secureTextEntry={true}
+                    // autoComplete={"new-password"}
+                    // textContentType={"password"}
+                    hasError={formData.password.hasError}
+                    errorMessage={formData.password.errorMessage}
+                  />
+                  <FormField
+                    placeholder="Secret Key"
+                    value={formData.secretKey.value}
+                    handleChangeText={(text) =>
+                      handleInputChange("secretKey", text)
+                    }
+                    labelIcon={key}
+                    secureTextEntry={true}
+                    // autoComplete={"new-password"}
+                    textContentType={"none"}
+                    hasError={formData.secretKey.hasError}
+                    errorMessage={formData.secretKey.errorMessage}
                   />
                 </ThemedView>
-                <ThemedButton
-                  title="Log in"
-                  handlePress={() => {
-                    Keyboard.dismiss();
-                    router.push("/login");
+                <ThemedView
+                  style={{
+                    flex: 0,
+                    position: "relative",
                   }}
-                  customContainerStyles={{ borderColor: theme.buttonSubtle }}
-                  customTextStyles={{ color: theme.buttonSubtle }}
-                />
+                >
+                  {formError.hasError && (
+                    <ThemedView
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 0,
+                        gap: 6,
+                        position: "absolute",
+                        top: 5,
+                      }}
+                    >
+                      <StaticIcon
+                        size={20}
+                        icon={error}
+                        color={theme.error}
+                        isTouchable={false}
+                      />
+                      <ThemedText style={{ color: theme.error }}>
+                        {formError.message}
+                      </ThemedText>
+                    </ThemedView>
+                  )}
+                </ThemedView>
+                <ThemedView style={{ flex: 0, marginTop: 48 }}>
+                  <ThemedButton
+                    title="Sign up"
+                    handlePress={() => handleRegister()}
+                    isLoading={isLoading}
+                    customContainerStyles={{
+                      backgroundColor: theme.backgroundNotable,
+                      borderColor: theme.backgroundNotable,
+                    }}
+                    customTextStyles={{ color: theme.background }}
+                  />
+                  <ThemedView
+                    style={{
+                      marginVertical: 16,
+                      flex: 0,
+                      gap: 12,
+                      flexDirection: "row",
+                    }}
+                  >
+                    <View
+                      style={{
+                        borderBottomColor: theme.borderSubtle,
+                        borderBottomWidth: 1,
+                        borderStyle: "solid",
+                        height: "50%",
+                        flex: 1,
+                      }}
+                    />
+                    <ThemedText
+                      style={{
+                        color: theme.textSubtle,
+                        textAlign: "center",
+                        lineHeight: 16,
+                        fontSize: 17,
+                      }}
+                    >
+                      or
+                    </ThemedText>
+                    <View
+                      style={{
+                        borderBottomColor: theme.borderSubtle,
+                        borderBottomWidth: 1,
+                        borderStyle: "solid",
+                        height: "50%",
+                        flex: 1,
+                      }}
+                    />
+                  </ThemedView>
+                  <ThemedButton
+                    title="Log in"
+                    handlePress={() => {
+                      Keyboard.dismiss();
+                      router.push("/login");
+                    }}
+                    customContainerStyles={{ borderColor: theme.borderSubtle }}
+                    customTextStyles={{ color: theme.textSubtle }}
+                  />
+                </ThemedView>
               </ThemedView>
             </ThemedView>
-          </ThemedView>
-        </ScrollView>
-      </KeyboardAvoidingView>
-      <StatusBar backgroundColor={theme.statusBar} style={"dark"} />
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
