@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -8,22 +7,28 @@ import {
   Platform,
   Modal,
 } from "react-native";
-import React, { useState } from "react";
-import { NewTaskType } from "../types/tasks";
-import { close, clock, calendar } from "../constants/icons";
-import StaticIcon from "../components/StaticIcon";
+import React, { useState, useEffect } from "react";
+import { NewTaskType, TaskType } from "../types/tasks";
+import { close, clock, calendar, error } from "../constants/icons";
+import StaticIcon from "./StaticIcon";
 import ThemedButton from "./ThemedButton";
-import ThemeText from "./ThemedText"
+import ThemedText from "./ThemedText";
 import { useTheme } from "../context/ThemeContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-type CreateTasksProps = {
-  handleAddTask: (newTask: NewTaskType) => void;
+type CreateEditTasksProps = {
+  task?: TaskType | null;
+  isEditMode: boolean;
+  handleAddTask: (task: NewTaskType) => void;
+  handleEditTask: (task: TaskType) => void;
   handleClose: () => void;
 };
 
-const CreateTask: React.FC<CreateTasksProps> = ({
+const CreateEditTask: React.FC<CreateEditTasksProps> = ({
+  task,
+  isEditMode,
   handleAddTask,
+  handleEditTask,
   handleClose,
 }) => {
   const [newTask, setNewTask] = useState<NewTaskType>({
@@ -32,11 +37,22 @@ const CreateTask: React.FC<CreateTasksProps> = ({
     due_at: new Date(),
   });
 
+  useEffect(() => {
+    if (isEditMode && task) {
+      setNewTask({
+        description: task.description,
+        is_flagged: task.is_flagged,
+        due_at: new Date(task.due_at),
+      });
+    }
+  }, [task]);
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [temporaryDate, setTemporaryDate] = useState<Date | undefined>(
     undefined
   );
+  const [isError, setIsError] = useState<boolean>(false);
   const { theme } = useTheme();
 
   const onDateTimeChange = (
@@ -44,7 +60,6 @@ const CreateTask: React.FC<CreateTasksProps> = ({
     selectedDate?: Date | undefined,
     isDate?: boolean
   ) => {
-    console.log(selectedDate);
     if (Platform.OS === "ios") {
       setTemporaryDate(selectedDate);
     } else {
@@ -63,9 +78,44 @@ const CreateTask: React.FC<CreateTasksProps> = ({
     isDate ? setShowDatePicker(false) : setShowTimePicker(false);
   };
 
+  const fieldsAreInvalid = () => {
+    if (!newTask.description || newTask.description.trim() === "") {
+      setIsError(true);
+      return true;
+    }
+    return false;
+  };
+
+  const checkAddEditTask = () => {
+    if (fieldsAreInvalid()) {
+      return;
+    }
+
+    if (isEditMode) {
+      
+      if (task && newTask.description && newTask.due_at)
+        handleEditTask({
+          id: task.id,
+          description: newTask.description,
+          due_at: newTask.due_at.toISOString(),
+          is_flagged: newTask.is_flagged,
+          is_complete: task.is_complete
+        });
+    } else {
+      handleAddTask(newTask);
+    }
+  };
+
+  const handleChangeText = (text: string) => {
+    setIsError(false);
+    setNewTask((prevTask) => ({ ...prevTask, description: text }));
+  };
+
   return (
     <View style={styles.modalContainer}>
-      <View style={[styles.modalContent, { backgroundColor: theme.background}]}>
+      <View
+        style={[styles.modalContent, { backgroundColor: theme.background }]}
+      >
         <StaticIcon
           size={32}
           icon={close}
@@ -74,31 +124,46 @@ const CreateTask: React.FC<CreateTasksProps> = ({
           handlePressIcon={handleClose}
           containerStyle={{ alignSelf: "flex-end" }}
         />
-        <ThemeText style={styles.modalTitle}>Create a new task</ThemeText>
+        <ThemedText style={styles.modalTitle}>
+          {isEditMode ? "Edit task" : "Create a new task"}
+        </ThemedText>
 
         <View>
-          <ThemeText style={styles.label}>Description</ThemeText>
+          <ThemedText style={styles.label}>Description</ThemedText>
           <TextInput
             placeholder="Task Description"
-            style={[styles.inputContainer, { color: theme.textSubtle, borderColor: theme.textSubtle}]}
+            style={[
+              styles.inputContainer,
+              { color: theme.text, borderColor: theme.textSubtle },
+            ]}
             value={newTask.description}
             placeholderTextColor={theme.textSubtle}
-            onChangeText={(text) =>
-              setNewTask((prevTask) => ({ ...prevTask, description: text }))
-            }
+            onChangeText={handleChangeText}
           />
+          <View style={{ height: 25 }}>
+            {isError && (
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+              >
+                <StaticIcon size={16} icon={error} color={theme.error} />
+                <ThemedText type={"errorMessage"}>
+                  Description cannot be empty.
+                </ThemedText>
+              </View>
+            )}
+          </View>
         </View>
 
         <View style={styles.row}>
           <View style={{ flex: 3 }}>
-            <ThemeText style={styles.label}>Date</ThemeText>
+            <ThemedText style={styles.label}>Date</ThemedText>
             <TouchableOpacity
-              style={[styles.inputContainer, {borderColor: theme.textSubtle}]}
+              style={[styles.inputContainer, { borderColor: theme.textSubtle }]}
               onPress={() => setShowDatePicker(true)}
               activeOpacity={1}
             >
               <TextInput
-                style={[styles.inputDateTime, { color: theme.text}]}
+                style={[styles.inputDateTime, { color: theme.text }]}
                 value={newTask.due_at?.toDateString()}
                 editable={false}
                 pointerEvents="none"
@@ -107,14 +172,14 @@ const CreateTask: React.FC<CreateTasksProps> = ({
             </TouchableOpacity>
           </View>
           <View style={{ flex: 2 }}>
-            <ThemeText style={styles.label}>Time</ThemeText>
+            <ThemedText style={styles.label}>Time</ThemedText>
             <TouchableOpacity
-              style={[styles.inputContainer, {borderColor: theme.textSubtle}]}
+              style={[styles.inputContainer, { borderColor: theme.textSubtle }]}
               onPress={() => setShowTimePicker(true)}
               activeOpacity={1}
             >
               <TextInput
-                style={[styles.inputDateTime, { color: theme.text}]}
+                style={[styles.inputDateTime, { color: theme.text }]}
                 value={newTask.due_at?.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -128,7 +193,7 @@ const CreateTask: React.FC<CreateTasksProps> = ({
         </View>
 
         <View style={styles.switchContainer}>
-          <ThemeText>Flagged:</ThemeText>
+          <ThemedText>Flagged:</ThemedText>
           <Switch
             value={newTask.is_flagged}
             trackColor={{ true: theme.flagged }}
@@ -189,10 +254,10 @@ const CreateTask: React.FC<CreateTasksProps> = ({
                   }
                 />
                 <ThemedButton
-                  title={"OK"}
+                  title={"Done"}
                   handlePress={() => handleDateTimePickerIosClose(true, true)}
                   customContainerStyles={[
-                    styles.buttonContainer,
+                    styles.buttonDateTimeContainer,
                     {
                       borderColor: theme.backgroundNotable,
                       backgroundColor: theme.backgroundNotable,
@@ -240,10 +305,10 @@ const CreateTask: React.FC<CreateTasksProps> = ({
                   }
                 />
                 <ThemedButton
-                  title={"OK"}
+                  title={"Done"}
                   handlePress={() => handleDateTimePickerIosClose(true, false)}
                   customContainerStyles={[
-                    styles.buttonContainer,
+                    styles.buttonDateTimeContainer,
                     {
                       borderColor: theme.backgroundNotable,
                       backgroundColor: theme.backgroundNotable,
@@ -274,8 +339,8 @@ const CreateTask: React.FC<CreateTasksProps> = ({
             }}
           ></ThemedButton>
           <ThemedButton
-            title={"Add Task"}
-            handlePress={() => handleAddTask(newTask)}
+            title={isEditMode ? "Save" : "Add Task"}
+            handlePress={checkAddEditTask}
             customContainerStyles={[
               styles.buttonContainer,
               {
@@ -343,6 +408,9 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex: 1,
   },
+  buttonDateTimeContainer: {
+    width: "50%",
+  },
   pickerModal: {
     flex: 1,
     justifyContent: "center",
@@ -362,4 +430,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateTask;
+export default CreateEditTask;

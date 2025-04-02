@@ -1,37 +1,45 @@
 import React, { useState } from "react";
-import ThemedView from "../components/ThemedView";
-import ThemedText from "../components/ThemedText";
 import StaticIcon from "../components/StaticIcon";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+  Pressable,
+} from "react-native";
 import { TaskType } from "../types/tasks";
-import { flag, clock, trashcan, check, edit } from "../constants/icons";
+import { flag, clock, trashcan, check, circle } from "../constants/icons";
 import { useTheme } from "../context/ThemeContext";
 import { apiClient } from "../context/AuthContext";
-import {
-  GestureHandlerRootView,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Reanimated, {
   SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 
 interface TaskProps {
   task: TaskType;
   updateTaskCompletion: (taskId: string, newCompletionState: boolean) => void;
   updateTaskFlagged: (taskId: string, newFlaggedState: boolean) => void;
   removeTask: (taskId: string) => void;
+  handleSelection: (task: TaskType) => void;
 }
 
 const Task: React.FC<TaskProps> = ({
   task,
   updateTaskCompletion,
   updateTaskFlagged,
-  removeTask
+  removeTask,
+  handleSelection,
 }) => {
   const { theme } = useTheme();
-  const [parentWidth, setParentWidth] = useState(0);
+  const { width } = useWindowDimensions();
+  const screenPadding = 20;
+  const parentWidth = width - screenPadding * 2;
+
+  const [isPressed, setIsPressed] = useState(false);
 
   const buildDueString = (diffMs: number): string => {
     const absDiffSec = Math.abs(Math.floor(diffMs / 1000));
@@ -39,7 +47,19 @@ const Task: React.FC<TaskProps> = ({
     const absDiffHr = Math.abs(Math.floor(absDiffMin / 60));
     const absDiffDay = Math.abs(Math.floor(absDiffHr / 24));
 
-    const duePrefix = diffMs > 0 ? "due in" : "overdue";
+    const duePrefix = () => {
+      if (task.is_complete) {
+        return "done"
+      } else {
+        if (diffMs > 0) {
+          return "due in"
+        } else {
+          return "overdue"
+        }
+      }
+    }
+
+    const dueSuffix = task.is_complete ? "ago" : ""
 
     const getTimeUnit = () => {
       const pluralize = (value: number, unit: string) =>
@@ -52,25 +72,36 @@ const Task: React.FC<TaskProps> = ({
       return pluralize(absDiffSec, "second");
     };
 
-    return `${duePrefix} ${getTimeUnit()}`;
+    return `${duePrefix()} ${getTimeUnit()} ${dueSuffix}`;
   };
 
   const createTimeRemaining = (dueDatetime: string): JSX.Element => {
     const now = Date.now();
-    const then = new Date(dueDatetime).getTime();
-    const diff = then - now;
+
+    let then: number;
+    if (!task.is_complete) {
+      then = new Date(task.due_at).getTime();
+    } else {
+      if (task.completed_at) {
+        then = new Date(task.completed_at).getTime();
+      } else {
+        then = now
+      }
+    }
+
+    const diff: number = then - now;
 
     return (
       <>
         <StaticIcon
           icon={clock}
           size={16}
-          color={diff > 0 ? theme.icon : theme.error}
+          color={diff > 0 || task.is_complete ? theme.icon : theme.error}
         />
         <Text
           style={[
             styles.timeText,
-            { color: diff > 0 ? theme.text : theme.error },
+            { color: diff > 0 || task.is_complete ? theme.text : theme.error },
           ]}
         >
           {buildDueString(diff)}
@@ -125,21 +156,33 @@ const Task: React.FC<TaskProps> = ({
         style={[
           styleAnimation,
           styles.actionContainer,
-          { backgroundColor: theme.completed },
+          {
+            backgroundColor: task.is_complete ? theme.restore : theme.completed,
+          },
         ]}
       >
-        <Reanimated.View
-          style={[
-            labelPosition,
-            styles.actionLabel,
-          ]}
-        >
-          <StaticIcon size={32} icon={check} color={theme.backgroundSubtle} />
-          <Reanimated.Text
-            style={[styles.actionText, { color: theme.backgroundSubtle }]}
-          >
-            Done
-          </Reanimated.Text>
+        <Reanimated.View style={[labelPosition, styles.actionLabel]}>
+          <StaticIcon
+            size={32}
+            icon={task.is_complete ? circle : check}
+            color={
+              isPressed ? theme.backgroundSelected : theme.backgroundSubtle
+            }
+          />
+          {!task.is_complete && (
+            <Reanimated.Text
+              style={[
+                styles.actionText,
+                {
+                  color: isPressed
+                    ? theme.backgroundSelected
+                    : theme.backgroundSubtle,
+                },
+              ]}
+            >
+              Done
+            </Reanimated.Text>
+          )}
         </Reanimated.View>
       </Reanimated.View>
     );
@@ -168,21 +211,24 @@ const Task: React.FC<TaskProps> = ({
           styles.actionContainer,
           { backgroundColor: theme.error },
         ]}
-        onLayout={(event) => setParentWidth(event.nativeEvent.layout.width)}
       >
-        <Reanimated.View
-          style={[
-            labelPosition,
-            styles.actionLabel,
-          ]}
-        >
+        <Reanimated.View style={[labelPosition, styles.actionLabel]}>
           <StaticIcon
             size={32}
             icon={trashcan}
-            color={theme.backgroundSubtle}
+            color={
+              isPressed ? theme.backgroundSelected : theme.backgroundSubtle
+            }
           />
           <Reanimated.Text
-            style={[styles.actionText, { color: theme.backgroundSubtle }]}
+            style={[
+              styles.actionText,
+              {
+                color: isPressed
+                  ? theme.backgroundSelected
+                  : theme.backgroundSubtle,
+              },
+            ]}
           >
             Delete
           </Reanimated.Text>
@@ -192,30 +238,22 @@ const Task: React.FC<TaskProps> = ({
   };
 
   const handleSwipeableOpen = (direction: string) => {
-    console.log("direction:", direction)
-
     if (direction == "right") {
-
-
-    }  else if (direction == "left") {
-
-
+      removeTask(task.id);
+    } else if (direction == "left") {
+      updateTaskCompletion(task.id, !task.is_complete);
     }
-    console.log("remove task")
-    removeTask(task.id)
-
-
-  }
-
-  const openEditModal = () => {
-    
-  }
+  };
 
   return (
     <GestureHandlerRootView>
       <ReanimatedSwipeable
         containerStyle={[
-          { backgroundColor: theme.backgroundSubtle },
+          {
+            backgroundColor: isPressed
+              ? theme.backgroundSelected
+              : theme.backgroundSubtle,
+          },
           styles.swipeable,
         ]}
         friction={1}
@@ -226,11 +264,19 @@ const Task: React.FC<TaskProps> = ({
         leftThreshold={80}
         renderLeftActions={LeftAction}
         overshootLeft={false}
-        onSwipeableOpen={(direction)=>{handleSwipeableOpen(direction)}}
-
+        onSwipeableOpen={(direction) => {
+          handleSwipeableOpen(direction);
+        }}
       >
-        <TouchableWithoutFeedback onLongPress={() => console.log("edit task")}>
-          <View style={styles.rowBetween}>
+        <Pressable
+          onLongPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            handleSelection(task);
+          }}
+          onPressIn={() => setIsPressed(true)}
+          onPressOut={() => setIsPressed(false)}
+        >
+          <View style={styles.taskContainer}>
             <Text style={styles.taskDescription}>{task.description}</Text>
             <View style={styles.iconContainer}>
               <StaticIcon
@@ -246,9 +292,8 @@ const Task: React.FC<TaskProps> = ({
             <View style={styles.timeRemaining}>
               {createTimeRemaining(task.due_at)}
             </View>
-
           </View>
-        </TouchableWithoutFeedback>
+        </Pressable>
       </ReanimatedSwipeable>
     </GestureHandlerRootView>
   );
@@ -276,10 +321,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
   },
-  rowBetween: {
+  taskContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+  },
+  taskContainerPressed: {
+    backgroundColor: "#d3d3d3",
   },
   iconContainer: {
     justifyContent: "flex-start",

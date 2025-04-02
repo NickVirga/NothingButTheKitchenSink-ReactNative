@@ -4,12 +4,13 @@ export interface TaskType {
   is_flagged: boolean;
   is_complete: boolean;
   due_at: string;
+  completed_at?: string;
 }
 
 export interface NewTaskType {
-  description: string | undefined;
+  description?: string;
   is_flagged: boolean;
-  due_at: Date | undefined;
+  due_at?: Date;
 }
 
 export interface TasksResponse {

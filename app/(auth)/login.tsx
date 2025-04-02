@@ -20,7 +20,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useTheme } from "../../context/ThemeContext";
 import { arrowBack, mail, lock, error } from "../../constants/icons";
 import { FormError, LoginForm } from "../../types/forms";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { useAuthContext, apiClient } from "../../context/AuthContext";
 import {
   AuthLoginRequest,
@@ -33,6 +33,7 @@ const AuthLogin: React.FC = () => {
   const authContext = useAuthContext();
   const params = useLocalSearchParams();
   const titleText: string = String(params.message || "Welcome\nBack");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const initialFormData: LoginForm = {
     email: { value: "nicktest@gmail.com", hasError: false, errorMessage: "" },
@@ -42,8 +43,6 @@ const AuthLogin: React.FC = () => {
       errorMessage: "",
     },
   };
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [formData, setFormData] = useState<LoginForm>(initialFormData);
 
@@ -69,21 +68,28 @@ const AuthLogin: React.FC = () => {
   };
 
   const handleLogin = async () => {
+
+    if (!formData.email.value || !formData.password.value) {
+      setFormError({
+        ...formError,
+        hasError: true,
+        message: "Fields cannot be empty.",
+      });
+      return;
+    }
+
     Keyboard.dismiss();
+    setIsLoading(true);
 
     try {
-      setIsLoading(true);
-
+      
       const requestBody: AuthLoginRequest = {
         email: formData.email.value,
         password: formData.password.value,
       };
 
-      const response: AxiosResponse<AuthLoginResponse> = await apiClient.post(
-        "/api/auth/login",
-        requestBody
-      );
-
+      const response = await apiClient.post<AuthLoginResponse>("/api/auth/login", requestBody);
+     
       authContext?.saveTokens(response.data.authTokens);
       router.replace("/home");
     } catch (err) {
@@ -121,8 +127,6 @@ const AuthLogin: React.FC = () => {
             <ThemedView
               style={{
                 padding: 32,
-                flexDirection: "column",
-                justifyContent: "space-between",
               }}
             >
               <ThemedView>
@@ -150,9 +154,7 @@ const AuthLogin: React.FC = () => {
                   flex: 0,
                 }}
               >
-                <ThemedView
-                  style={{ flexDirection: "column", gap: 0, flex: 0 }}
-                >
+                <ThemedView style={{ flex: 0 }}>
                   <FormField
                     placeholder="Email"
                     value={formData.email.value}
@@ -182,7 +184,7 @@ const AuthLogin: React.FC = () => {
                       justifyContent: "flex-end",
                       flexDirection: "row",
                       position: "absolute",
-                      bottom: 0,
+                      bottom: Platform.OS == "android" ? 0 : -8,
                       alignSelf: "flex-end",
                     }}
                     onPress={() => {
@@ -195,10 +197,7 @@ const AuthLogin: React.FC = () => {
                     activeOpacity={0.7}
                   >
                     <ThemedText
-                      style={{
-                        color: theme.textNotable,
-                        fontWeight: 500,
-                      }}
+                      type={"link"}
                     >
                       Forgot password?
                     </ThemedText>
@@ -227,7 +226,11 @@ const AuthLogin: React.FC = () => {
                         color={theme.error}
                         isTouchable={false}
                       />
-                      <ThemedText style={{ color: theme.error }}>
+                      <ThemedText
+                        style={{ color: theme.error, fontSize: 13 }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
                         {formError.message}
                       </ThemedText>
                     </ThemedView>

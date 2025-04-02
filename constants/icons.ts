@@ -4,6 +4,7 @@ import addImg from "../assets/icons/add.png"
 import addBoxImg from "../assets/icons/add-box.png"
 import arrowBackImg from "../assets/icons/arrow-back.png";
 import calendarImg from "../assets/icons/calendar.png"
+import circleImg from "../assets/icons/circle.png"
 import checkImg from "../assets/icons/check.png";
 import clockImg from "../assets/icons/clock.png"
 import closeImg from "../assets/icons/close.png"
@@ -26,6 +27,7 @@ export const add: ImageSourcePropType = addImg;
 export const addBox: ImageSourcePropType = addBoxImg;
 export const arrowBack: ImageSourcePropType = arrowBackImg;
 export const calendar: ImageSourcePropType = calendarImg;
+export const circle: ImageSourcePropType = circleImg;
 export const check: ImageSourcePropType = checkImg;
 export const clock: ImageSourcePropType = clockImg;
 export const close: ImageSourcePropType = closeImg;

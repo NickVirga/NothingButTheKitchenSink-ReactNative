@@ -4,6 +4,15 @@ import { useEffect } from "react";
 import { useFonts } from "expo-font";
 import { ThemeProvider } from "../context/ThemeContext";
 import { AuthProvider } from "../context/AuthContext";
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from 'react-native-reanimated';
+
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false, 
+});
 
 SplashScreen.preventAutoHideAsync();
 

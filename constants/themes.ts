@@ -5,6 +5,7 @@ export const themes = {
     textSubtle: "#969696",
     textNotable: "#007AFF",
     background: "#F0F0F0",
+    backgroundSelected: "#D3D3D3",
     backgroundSubtle: "#FFFFFF",
     backgroundNotable: "#007AFF",
     border: "#1C1C1E",
@@ -16,7 +17,8 @@ export const themes = {
     tabIconActive: "#007AFF",
     error: "#D32F2F",
     flagged: "#FFA000",
-    completed: "#10B981"
+    completed: "#10B981",
+    restore: "#93c7ff",
   },
   dark: {
     mode: "dark",
@@ -24,6 +26,7 @@ export const themes = {
     textSubtle: "#C8C8C8",
     textNotable: "#0A84FF",
     background: "#1C1C1E",
+    backgroundSelected: "#D3D3D3",
     backgroundSubtle: "#E0E0E0",
     backgroundNotable: "#0A84FF",
     border: "#F2F2F7",
@@ -35,6 +38,7 @@ export const themes = {
     tabIconActive: "#0A84FF",
     error: "#EF5350",
     flagged: "#FFCA28",
-    completed: "#34D399"
+    completed: "#34D399",
+    restore: "#93c7ff",
   },
 };

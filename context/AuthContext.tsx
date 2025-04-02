@@ -56,6 +56,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    
+
     const loadAuthToken = async () => {
       setIsLoading(true);
 
@@ -77,6 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadAuthToken();
   }, []);
 
+  
   const logout = async (logoutAllDevices: boolean) => {
     try {
       AsyncStorage.removeItem("authTokens");
@@ -91,6 +94,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Logout failed:", err);
     }
   };
+
+  
+
 
   const refreshAccessToken = async () => {
     console.log('refresh token', refreshToken)

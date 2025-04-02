@@ -1,7 +1,8 @@
-import CreateTask from "./CreateTask"
+import CreateEditTask from "./CreateEditTask"
 import DynamicIcon from "./DynamicIcon"
 import FormField from "./FormField";
 import Loader from "./Loader"
+import ProgressCircle from "./ProgressCircle";
 import Task from "./Task"
 import ThemedButton from "./ThemedButton";
 import ThemedText from "./ThemedText";
@@ -10,10 +11,11 @@ import StaticIcon from "./StaticIcon"
 
 
 export {
-  CreateTask,
+  CreateEditTask,
   DynamicIcon,
   FormField,
   Loader,
+  ProgressCircle,
   Task,
   ThemedButton,
   ThemedText,

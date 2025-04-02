@@ -11,14 +11,14 @@ import {
   Image,
   ImageStyle
 } from "react-native";
-
+import ThemedText from "./ThemedText";
 import { useTheme } from "../context/ThemeContext";
 
 type ThemedButtonProps = {
   title: string;
   handlePress: (event: GestureResponderEvent) => void;
   customContainerStyles?: StyleProp<ViewStyle>;
-  customTextStyles?: StyleProp<TextStyle>;
+  customTextStyles?: TextStyle;
   customIconStyles?: StyleProp<ImageStyle>;
   isLoading?: boolean;
   icon?: ImageSourcePropType;
@@ -55,14 +55,14 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
         ></Image>
       )}
       {!isLoading && (
-        <Text style={[defaultStyles.text, customTextStyles]}>{title}</Text>
+        <ThemedText style={[defaultStyles.text, customTextStyles || {}]}>{title}</ThemedText>
       )}
 
       {isLoading && (
         <ActivityIndicator
           animating={isLoading}
-          color={theme.background}
-          size="small"
+          color={theme.text}
+          size={25}
         />
       )}
     </TouchableOpacity>
@@ -71,8 +71,7 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
 
 const defaultStyles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    height: 50,
     borderWidth: 1,
     borderRadius: 8,
     alignItems: "center",
@@ -80,9 +79,9 @@ const defaultStyles = StyleSheet.create({
     flexDirection: 'row',
   },
   text: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Poppins-SemiBold",
     textAlign: "center",
+    lineHeight: 22,
   },
   icon: {
     width: 24,
