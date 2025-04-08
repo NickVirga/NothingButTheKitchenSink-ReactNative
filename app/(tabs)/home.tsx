@@ -104,39 +104,66 @@ const Home = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isToDoFilter, setIsToDoFilter] = useState<boolean>(true);
 
-  const { completedPercentage, flaggedPercentage, overduePercentage } =
-    useMemo(() => {
-      if (tasksList.length === 0) {
-        return {
-          completedPercentage: 0,
-          flaggedPercentage: 0,
-          overduePercentage: 0,
-        };
-      }
-
-      const tasksTotalCnt = tasksList.length;
-      const tasksCompleteCnt = tasksList.filter(
-        (task) => task.is_complete
-      ).length;
-      const tasksFlaggedeCnt = tasksList.filter(
-        (task) => task.is_flagged
-      ).length;
-      const tasksOverdueCnt = tasksList.filter((task) => {
-        const now = Date.now();
-        const then = new Date(task.due_at).getTime();
-        if (then < now) return true;
-        return false;
-      }).length;
-      
-
+  const {
+    completedPercentage,
+    flaggedPercentage,
+    overduePercentage,
+    tasksTotalCnt,
+    tasksCompleteCnt,
+    tasksFlaggedCnt,
+    tasksOverdueCnt,
+  } = useMemo(() => {
+    if (tasksList.length === 0) {
       return {
-        completedPercentage: (tasksCompleteCnt / tasksTotalCnt) * 100,
-        flaggedPercentage: (tasksFlaggedeCnt / tasksTotalCnt) * 100,
-        overduePercentage: (tasksOverdueCnt / tasksTotalCnt) * 100
+        completedPercentage: 0,
+        flaggedPercentage: 0,
+        overduePercentage: 0,
+        tasksTotalCnt: 0,
+        tasksCompleteCnt: 0,
+        tasksFlaggedCnt: 0,
+        tasksFlaggedNotOverdueCnt: 0,
+        tasksOverdueCnt: 0,
       };
+    }
 
-    }, [tasksList]);
+    let tasksCompleteCnt = 0;
+    let tasksFlaggedCnt = 0;
+    let tasksFlaggedNotOverdueCnt = 0;
+    let tasksOverdueCnt = 0;
+    const now = Date.now();
 
+    for (const task of tasksList) {
+      const dueTime = new Date(task.due_at).getTime();
+      const isComplete = task.is_complete;
+      const isFlagged = task.is_flagged;
+
+      if (isComplete) {
+        tasksCompleteCnt++;
+      } else {
+        if (dueTime < now) {
+          tasksOverdueCnt++;
+        }
+        if (isFlagged) {
+          tasksFlaggedCnt++;
+          if (dueTime >= now) {
+            tasksFlaggedNotOverdueCnt++;
+          }
+        }
+      }
+    }
+
+    const tasksTotalCnt = tasksList.length;
+
+    return {
+      completedPercentage: (tasksCompleteCnt / tasksTotalCnt) * 100,
+      flaggedPercentage: (tasksFlaggedNotOverdueCnt / tasksTotalCnt) * 100,
+      overduePercentage: (tasksOverdueCnt / tasksTotalCnt) * 100,
+      tasksTotalCnt,
+      tasksCompleteCnt,
+      tasksFlaggedCnt,
+      tasksOverdueCnt,
+    };
+  }, [tasksList]);
 
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString("en-US", {
@@ -339,29 +366,35 @@ const Home = () => {
           }}
         >
           <ThemedText style={{ fontWeight: "bold" }}>Progress</ThemedText>
-          {/* <View
-            style={{
-              borderStyle: "solid",
-              borderColor: "black",
-              borderWidth: 2,
-              height: 100,
-              width: 100,
-              alignSelf: "center",
-              borderRadius: "50%",
-            }}
-          ></View> */}
-          <ProgressCircle
-            segments={[
-              { percentage: flaggedPercentage, color: "yellow" },
-              { percentage: overduePercentage, color: "red" },
-              { percentage: completedPercentage, color: "green" },
-            ]}
-            size={100}
-            strokeWidth={8}
-          ></ProgressCircle>
-          <Text>{(`flaggedPercentage: ${flaggedPercentage}`)}</Text>
-          <Text>{(`overduePercentage: ${overduePercentage}`)}</Text>
-          <Text>{(`completedPercentage: ${completedPercentage}`)}</Text>
+          <ThemedView
+            style={{ flex: 0, flexDirection: "row", alignItems: "center" }}
+          >
+            <ThemedView style={{ flex: 0, position: "absolute" }}>
+              <ThemedText
+                style={{ color: theme.completed }}
+              >{`Completed: ${tasksCompleteCnt}`}</ThemedText>
+              <ThemedText
+                style={{ color: theme.error }}
+              >{`Overdue: ${tasksOverdueCnt}`}</ThemedText>
+              <ThemedText
+                style={{ color: theme.flagged }}
+              >{`Flagged: ${tasksFlaggedCnt}`}</ThemedText>
+            </ThemedView>
+            <ThemedView style={{ flex: 0, position: 'relative', margin: 'auto', justifyContent: 'center', alignItems: 'center' }}>
+              <ProgressCircle
+                segments={[
+                  // { percentage: flaggedPercentage, color: theme.flagged },
+                  // { percentage: overduePercentage, color: theme.error },
+                  { percentage: completedPercentage, color: theme.completed },
+                ]}
+                size={100}
+                strokeWidth={14}
+              ></ProgressCircle>
+              <ThemedText
+                style={{ position: "absolute", fontWeight: "bold"  }}
+              >{`${tasksCompleteCnt}/${tasksTotalCnt}`}</ThemedText>
+            </ThemedView>
+          </ThemedView>
         </ThemedView>
         <ThemedView
           style={{

@@ -26,7 +26,7 @@ const ProgressCircle: React.FC<ProgressCircleProps> = ({
 
   return (
     <View
-    style={[styles.container, {backgroundColor: 'theme.background'}]}
+    style={[styles.container, {backgroundColor: theme.background}]}
     >
       <Svg
         width={size}
@@ -37,6 +37,7 @@ const ProgressCircle: React.FC<ProgressCircleProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
+          stroke={theme.backgroundSubtle}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -68,8 +69,8 @@ export default ProgressCircle;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
+        // flex: 0,
+        // justifyContent: 'center',
+        // alignItems: 'center',
     }
 })
