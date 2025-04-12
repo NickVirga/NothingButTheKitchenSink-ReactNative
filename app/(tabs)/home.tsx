@@ -29,72 +29,6 @@ import { add } from "../../constants/icons";
 
 const Home = () => {
   const { theme } = useTheme();
-  const tasksListExample: TaskType[] = [
-    {
-      id: "1dd8b773-d265-4527-84b1-87ed6b30dea1",
-      description:
-        "Clean all dishes in sink 6. Lorem ipsum dolor, sit amet consectetur adipisicing elit. Tempore mollitia ratione rem nulla accusamus asperiores quod distinctio, expedita non minima, unde aut quaerat nostrum? Tempora consequatur voluptate accusantium sed quos!",
-      is_flagged: false,
-      is_complete: false,
-      due_at: "2025-01-28T16:13:36.948089",
-    },
-    {
-      id: "da752078-e2c8-4e05-8c3b-a610ea4e0e62",
-      description: "Clean all dishes in sink 7.",
-      is_flagged: true,
-      is_complete: false,
-      due_at: "2025-01-28T15:00:00",
-    },
-    // {
-    //   id: "4ec9eff8-6499-4d70-be96-0b668c176a83",
-    //   description: "Clean all dishes in sink 8.",
-    //   is_flagged: true,
-    //   is_complete: false,
-    //   due_at: "2025-01-28T15:00:00",
-    // },
-    // {
-    //   id: "1dd8b773-d265-4527-84b1-87ed6b30dea2",
-    //   description: "Clean all dishes in sink 6.",
-    //   is_flagged: false,
-    //   is_complete: false,
-    //   due_at: "2025-01-28T16:13:36.948089",
-    // },
-    // {
-    //   id: "da752078-e2c8-4e05-8c3b-a610ea4e0e63",
-    //   description: "Clean all dishes in sink 7.",
-    //   is_flagged: true,
-    //   is_complete: false,
-    //   due_at: "2025-01-28T15:00:00",
-    // },
-    // {
-    //   id: "4ec9eff8-6499-4d70-be96-0b668c176a84",
-    //   description: "Clean all dishes in sink 8.",
-    //   is_flagged: true,
-    //   is_complete: false,
-    //   due_at: "2025-01-28T15:00:00",
-    // },
-    // {
-    //   id: "1dd8b773-d265-4527-84b1-87ed6b30dea5",
-    //   description: "Clean all dishes in sink 6.",
-    //   is_flagged: false,
-    //   is_complete: false,
-    //   due_at: "2025-01-28T16:13:36.948089",
-    // },
-    // {
-    //   id: "da752078-e2c8-4e05-8c3b-a610ea4e0e66",
-    //   description: "Clean all dishes in sink 7.",
-    //   is_flagged: true,
-    //   is_complete: false,
-    //   due_at: "2025-01-28T15:00:00",
-    // },
-    // {
-    //   id: "4ec9eff8-6499-4d70-be96-0b668c176a87",
-    //   description: "Clean all dishes in sink 8.",
-    //   is_flagged: true,
-    //   is_complete: false,
-    //   due_at: "2025-01-28T15:00:00",
-    // },
-  ];
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [tasksList, setTasksList] = useState<TaskType[] | []>([]);
@@ -370,15 +304,15 @@ const Home = () => {
             style={{ flex: 0, flexDirection: "row", alignItems: "center" }}
           >
             <ThemedView style={{ flex: 0, position: "absolute" }}>
-              <ThemedText
+              {tasksCompleteCnt > 0 && <ThemedText
                 style={{ color: theme.completed }}
-              >{`Completed: ${tasksCompleteCnt}`}</ThemedText>
-              <ThemedText
+              >{`Completed: ${tasksCompleteCnt}`}</ThemedText>}
+              {tasksOverdueCnt > 0 && <ThemedText
                 style={{ color: theme.error }}
-              >{`Overdue: ${tasksOverdueCnt}`}</ThemedText>
-              <ThemedText
+              >{`Overdue: ${tasksOverdueCnt}`}</ThemedText>}
+              {tasksFlaggedCnt > 0 && <ThemedText
                 style={{ color: theme.flagged }}
-              >{`Flagged: ${tasksFlaggedCnt}`}</ThemedText>
+              >{`Flagged: ${tasksFlaggedCnt}`}</ThemedText>}
             </ThemedView>
             <ThemedView style={{ flex: 0, position: 'relative', margin: 'auto', justifyContent: 'center', alignItems: 'center' }}>
               <ProgressCircle

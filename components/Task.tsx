@@ -18,6 +18,7 @@ import Reanimated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import ThemedText from "./ThemedText";
 
 interface TaskProps {
   task: TaskType;
@@ -98,44 +99,16 @@ const Task: React.FC<TaskProps> = ({
           size={16}
           color={diff > 0 || task.is_complete ? theme.icon : theme.error}
         />
-        <Text
+        <ThemedText
           style={[
             styles.timeText,
             { color: diff > 0 || task.is_complete ? theme.text : theme.error },
           ]}
         >
           {buildDueString(diff)}
-        </Text>
+        </ThemedText>
       </>
     );
-  };
-
-  const setTaskFlag = async (newflaggedState: boolean) => {
-    try {
-      const response = await apiClient.patch(`/api/tasks/${task.id}/flag`, {
-        is_flagged: newflaggedState,
-      });
-
-      if (response.status === 200) {
-        updateTaskFlagged(task.id, newflaggedState);
-      }
-    } catch (err) {
-      console.error("Error setting task flag:", err);
-    }
-  };
-
-  const setTaskCompletion = async (newCompletionState: boolean) => {
-    try {
-      const response = await apiClient.patch(`/api/tasks/${task.id}/complete`, {
-        is_complete: newCompletionState,
-      });
-
-      if (response.status === 200) {
-        updateTaskCompletion(task.id, newCompletionState);
-      }
-    } catch (err) {
-      console.error("Error setting task completion status:", err);
-    }
   };
 
   const LeftAction = (prog: SharedValue<number>, drag: SharedValue<number>) => {
@@ -277,14 +250,14 @@ const Task: React.FC<TaskProps> = ({
           onPressOut={() => setIsPressed(false)}
         >
           <View style={styles.taskContainer}>
-            <Text style={styles.taskDescription}>{task.description}</Text>
+            <ThemedText style={styles.taskDescription}>{task.description}</ThemedText>
             <View style={styles.iconContainer}>
               <StaticIcon
                 icon={flag}
                 size={32}
                 color={task.is_flagged ? theme.flagged : theme.background}
                 isTouchable={true}
-                handlePressIcon={() => setTaskFlag(!task.is_flagged)}
+                handlePressIcon={() => updateTaskFlagged(task.id, !task.is_flagged)}
               />
             </View>
           </View>
@@ -349,7 +322,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   timeText: {
-    fontSize: 12,
+    fontSize: 10,
     lineHeight: 14,
   },
 });

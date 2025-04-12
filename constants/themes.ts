@@ -27,7 +27,7 @@ export const themes = {
     textNotable: "#0A84FF",
     background: "#1C1C1E",
     backgroundSelected: "#D3D3D3",
-    backgroundSubtle: "#E0E0E0",
+    backgroundSubtle: "#39393D",
     backgroundNotable: "#0A84FF",
     border: "#F2F2F7",
     borderSubtle: "#C8C8C8",

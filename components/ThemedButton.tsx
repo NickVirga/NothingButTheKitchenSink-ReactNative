@@ -1,6 +1,5 @@
 import {
   ActivityIndicator,
-  Text,
   TouchableOpacity,
   GestureResponderEvent,
   StyleProp,

@@ -6,6 +6,7 @@ import arrowBackImg from "../assets/icons/arrow-back.png";
 import calendarImg from "../assets/icons/calendar.png"
 import circleImg from "../assets/icons/circle.png"
 import checkImg from "../assets/icons/check.png";
+import checkCircleImg from "../assets/icons/check-circle.png"
 import clockImg from "../assets/icons/clock.png"
 import closeImg from "../assets/icons/close.png"
 import darkModeImg from "../assets/icons/dark-mode.png";
@@ -17,8 +18,10 @@ import homeImg from "../assets/icons/home.png";
 import keyImg from "../assets/icons/key.png";
 import lightModeImg from "../assets/icons/light-mode.png";
 import lockImg from "../assets/icons/lock.png";
+import logoutImg from "../assets/icons/logout.png"
 import mailImg from "../assets/icons/mail.png";
 import personImg from "../assets/icons/person.png";
+import routineImg from "../assets/icons/routine.png"
 import trashcanImg from "../assets/icons/trashcan.png"
 import visibilityImg from "../assets/icons/visibility.png";
 import visibilityOffImg from "../assets/icons/visibility-off.png";
@@ -29,6 +32,7 @@ export const arrowBack: ImageSourcePropType = arrowBackImg;
 export const calendar: ImageSourcePropType = calendarImg;
 export const circle: ImageSourcePropType = circleImg;
 export const check: ImageSourcePropType = checkImg;
+export const checkCircle: ImageSourcePropType = checkCircleImg;
 export const clock: ImageSourcePropType = clockImg;
 export const close: ImageSourcePropType = closeImg;
 export const darkMode: ImageSourcePropType = darkModeImg;
@@ -40,8 +44,10 @@ export const home: ImageSourcePropType = homeImg;
 export const key: ImageSourcePropType = keyImg;
 export const lightMode: ImageSourcePropType = lightModeImg;
 export const lock: ImageSourcePropType = lockImg;
+export const logout: ImageSourcePropType = logoutImg;
 export const mail: ImageSourcePropType = mailImg;
 export const person: ImageSourcePropType = personImg;
+export const routine: ImageSourcePropType = routineImg;
 export const trashcan: ImageSourcePropType = trashcanImg;
 export const visibility: ImageSourcePropType = visibilityImg;
 export const visibilityOff: ImageSourcePropType = visibilityOffImg;
